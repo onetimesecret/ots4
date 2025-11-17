@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:4000"
+    environment:
+      - MIX_ENV=dev
+      - SECRET_KEY_BASE=dev_secret_key_base_at_least_64_bytes_long_change_in_production_please
+      - ENCRYPTION_KEY=3Jnb0hZiHIzHTOih7t2cNWoWJNJdIbmS7eIhqQBQvmY=
+      - PHX_HOST=localhost
+      - PORT=4000
+    volumes:
+      - .:/app
+      - deps:/app/deps
+      - build:/app/_build
+      - mnesia:/app/priv/mnesia
+    stdin_open: true
+    tty: true
+    command: mix phx.server
+
+volumes:
+  deps:
+  build:
+  mnesia:
