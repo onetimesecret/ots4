@@ -16,26 +16,6 @@ defmodule OneTimeWeb.CoreComponents do
     <div id={@id}>
       <.flash kind={:info} title="Info" flash={@flash} />
       <.flash kind={:error} title="Error" flash={@flash} />
-      <.flash
-        id="client-error"
-        kind={:error}
-        title="Error"
-        phx-mounted={show("#client-error")}
-        phx-click={JS.push("clear-flash") |> hide("#client-error")}
-        hidden
-      >
-        <.live_component module={OneTimeWeb.ErrorComponent} id="error-component" />
-      </.flash>
-      <.flash
-        id="client-info"
-        kind={:info}
-        title="Success"
-        phx-mounted={show("#client-info")}
-        phx-click={JS.push("clear-flash") |> hide("#client-info")}
-        hidden
-      >
-        <.live_component module={OneTimeWeb.InfoComponent} id="info-component" />
-      </.flash>
     </div>
     """
   end
@@ -280,24 +260,59 @@ defmodule OneTimeWeb.CoreComponents do
   end
 
   defp translate_error(msg), do: msg
-end
 
-defmodule OneTimeWeb.ErrorComponent do
-  use Phoenix.LiveComponent
+  @doc """
+  Renders a datetime with timezone information.
 
-  def render(assigns) do
+  By default shows UTC, but adds data attributes for client-side
+  JavaScript to convert to the user's local timezone.
+
+  ## Examples
+
+      <.datetime value={@secret.expires_at} />
+      <.datetime value={@secret.expires_at} format="short" />
+
+  """
+  attr :value, :any, required: true, doc: "the datetime value (DateTime or NaiveDateTime)"
+  attr :format, :string, default: "long", values: ["short", "long", "relative"]
+  attr :class, :string, default: ""
+
+  def datetime(assigns) do
     ~H"""
-    <div></div>
+    <time
+      datetime={to_iso8601(@value)}
+      phx-hook="LocalTime"
+      data-format={@format}
+      id={"time-" <> to_iso8601(@value)}
+      class={@class}
+      title={Calendar.strftime(@value, "%B %d, %Y at %I:%M:%S %p UTC")}
+    >
+      <%= format_time(@value, @format) %>
+    </time>
     """
   end
-end
 
-defmodule OneTimeWeb.InfoComponent do
-  use Phoenix.LiveComponent
+  defp to_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+  defp to_iso8601(%NaiveDateTime{} = dt), do: NaiveDateTime.to_iso8601(dt)
 
-  def render(assigns) do
-    ~H"""
-    <div></div>
-    """
+  defp format_time(value, "short") do
+    Calendar.strftime(value, "%b %d, %Y %I:%M %p")
+  end
+
+  defp format_time(value, "relative") do
+    now = DateTime.utc_now()
+    diff = DateTime.diff(value, now)
+
+    cond do
+      diff < 60 -> "in #{diff} seconds"
+      diff < 3600 -> "in #{div(diff, 60)} minutes"
+      diff < 86400 -> "in #{div(diff, 3600)} hours"
+      diff < 604_800 -> "in #{div(diff, 86400)} days"
+      true -> Calendar.strftime(value, "%b %d, %Y")
+    end
+  end
+
+  defp format_time(value, _format) do
+    Calendar.strftime(value, "%B %d, %Y at %I:%M %p")
   end
 end

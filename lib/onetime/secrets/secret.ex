@@ -11,6 +11,7 @@ defmodule OneTime.Secrets.Secret do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @max_ttl Application.compile_env(:onetime, :max_ttl, 7_776_000)
 
   schema "secrets" do
     field :key, :string
@@ -82,7 +83,6 @@ defmodule OneTime.Secrets.Secret do
 
   defp validate_ttl(changeset) do
     expires_at = get_field(changeset, :expires_at)
-    max_ttl = Application.get_env(:onetime, :max_ttl, 7_776_000)
 
     if expires_at do
       now = DateTime.utc_now()
@@ -92,8 +92,8 @@ defmodule OneTime.Secrets.Secret do
         DateTime.compare(expires_at, now) == :lt ->
           add_error(changeset, :expires_at, "must be in the future")
 
-        ttl_seconds > max_ttl ->
-          add_error(changeset, :expires_at, "TTL exceeds maximum allowed (#{max_ttl} seconds)")
+        ttl_seconds > @max_ttl ->
+          add_error(changeset, :expires_at, "TTL exceeds maximum allowed (#{@max_ttl} seconds)")
 
         true ->
           changeset

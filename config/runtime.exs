@@ -11,19 +11,29 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
+  # Build SSL options conditionally
+  ssl_opts = [
+    verify: :verify_peer,
+    server_name_indication: to_charlist(System.get_env("DATABASE_HOSTNAME") || "localhost"),
+    customize_hostname_check: [
+      match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+    ]
+  ]
+
+  # Add cacertfile only if provided
+  ssl_opts =
+    if cacertfile = System.get_env("DATABASE_CA_CERT_PATH") do
+      Keyword.put(ssl_opts, :cacertfile, cacertfile)
+    else
+      ssl_opts
+    end
+
   config :onetime, OneTime.Repo,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6,
     ssl: true,
-    ssl_opts: [
-      verify: :verify_peer,
-      cacertfile: System.get_env("DATABASE_CA_CERT_PATH"),
-      server_name_indication: to_charlist(System.get_env("DATABASE_HOSTNAME") || "localhost"),
-      customize_hostname_check: [
-        match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
-      ]
-    ]
+    ssl_opts: ssl_opts
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   secret_key_base =

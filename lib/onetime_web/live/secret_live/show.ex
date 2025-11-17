@@ -81,7 +81,7 @@ defmodule OneTimeWeb.SecretLive.Show do
               This secret can be viewed <%= if @secret.max_views == 1,
                 do: "only once",
                 else: "#{@secret.max_views - @secret.views_count} more time(s)" %>.
-              It will expire on <%= Calendar.strftime(@secret.expires_at, "%B %d, %Y at %I:%M %p UTC") %>.
+              It will expire on <.datetime value={@secret.expires_at} format="long" />.
             </p>
           </div>
 

@@ -15,10 +15,6 @@ defmodule OneTimeWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: false
 
-  socket "/phoenix/live_reload/socket", Phoenix.LiveReload.Socket
-  plug Phoenix.LiveReload
-  plug Phoenix.CodeReloader
-
   # Serve at "/" the static files from "priv/static" directory.
   plug Plug.Static,
     at: "/",

@@ -43,6 +43,66 @@ Hooks.Copy = {
   }
 }
 
+// Convert UTC times to local timezone
+Hooks.LocalTime = {
+  mounted() {
+    this.updateTime()
+  },
+  updated() {
+    this.updateTime()
+  },
+  updateTime() {
+    const datetime = this.el.getAttribute("datetime")
+    const format = this.el.dataset.format || "long"
+
+    if (datetime) {
+      const date = new Date(datetime)
+      let formatted
+
+      switch(format) {
+        case "short":
+          formatted = date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+          break
+        case "relative":
+          formatted = this.relativeTime(date)
+          break
+        default:
+          formatted = date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          })
+      }
+
+      this.el.textContent = formatted
+    }
+  },
+  relativeTime(date) {
+    const now = new Date()
+    const diff = Math.floor((date - now) / 1000)
+
+    if (diff < 60) return `in ${diff} seconds`
+    if (diff < 3600) return `in ${Math.floor(diff / 60)} minutes`
+    if (diff < 86400) return `in ${Math.floor(diff / 3600)} hours`
+    if (diff < 604800) return `in ${Math.floor(diff / 86400)} days`
+
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: Hooks

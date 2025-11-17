@@ -56,5 +56,6 @@ config :onetime, OneTime.Guardian,
   secret_key: "dev_guardian_secret_key_replace_in_production"
 
 # Encryption key for development (DO NOT USE IN PRODUCTION)
+# Must be exactly 32 bytes
 config :onetime, OneTime.Vault,
-  encryption_key: "dev_encryption_key_replace_in_production_must_be_32_bytes_exactly_here"
+  encryption_key: "dev_encryption_key_32bytes!!"
