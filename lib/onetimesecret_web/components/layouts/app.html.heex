@@ -1,0 +1,8 @@
+<header>
+  <h1>🔐 OneTimeSecret</h1>
+</header>
+<main class="container">
+  <.flash :if={@flash["info"]} flash={@flash} kind={:info} />
+  <.flash :if={@flash["error"]} flash={@flash} kind={:error} />
+  <%= @inner_content %>
+</main>
