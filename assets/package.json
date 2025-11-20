@@ -1,0 +1,21 @@
+{
+  "name": "onetime",
+  "version": "4.0.0",
+  "description": "OneTimeSecret Community Edition",
+  "repository": {},
+  "license": "MIT",
+  "scripts": {
+    "deploy": "cd .. && mix assets.deploy && rm -f _build/esbuild*"
+  },
+  "dependencies": {
+    "phoenix": "file:../deps/phoenix",
+    "phoenix_html": "file:../deps/phoenix_html",
+    "phoenix_live_view": "file:../deps/phoenix_live_view"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
+  }
+}
